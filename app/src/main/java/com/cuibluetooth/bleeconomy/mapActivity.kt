@@ -107,7 +107,7 @@ class MapActivity : AppCompatActivity() {
         val params = panelCard.layoutParams as ConstraintLayout.LayoutParams
         if (isPanelExpanded) {
             params.width = 0
-            params.matchConstraintPercentWidth = 0.5f
+            params.matchConstraintPercentWidth = 0.75f
         } else {
             params.width = ConstraintLayout.LayoutParams.WRAP_CONTENT
             params.matchConstraintPercentWidth = 0f
