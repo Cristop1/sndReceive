@@ -32,7 +32,7 @@ class StudentAdapter : ListAdapter<Student, StudentAdapter.StudentViewHolder>(Di
                 student.projectName?.takeIf { it.isNotBlank() } ?: "—"
             //TODO binding.studentCheckbox.isChecked = student.isTracked
             binding.root.setOnClickListener {
-                // TODO Later add a popup to the respective Student
+                // TODO Later add a popup to the respective Student a
             }
         }
 
