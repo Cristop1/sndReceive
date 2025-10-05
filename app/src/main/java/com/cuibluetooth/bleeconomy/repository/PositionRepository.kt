@@ -38,8 +38,10 @@ class PositionRepository {
     private fun simulateBatch(){
         //Dummy data
         val batch = listOf(
-            Student(1, "Student1", Coordinates(2.0, 3.0), Coordinates(-1.0, -2.0)),
-            Student(2, "Student2", Coordinates(-4.0, 5.0), null)
+            Student(1,"Student1", Coordinates(2.0, 3.0), Coordinates(-1.0, -2.0), projectName = "App movil",
+                institutionalCode = "20191508"),
+            Student(2, "Student2", Coordinates(-4.0, 5.0), null, projectName = "Vehiculo movil",
+                institutionalCode = "20150632")
         )
         updateFromBatch(batch)
     }

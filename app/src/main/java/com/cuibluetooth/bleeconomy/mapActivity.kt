@@ -15,6 +15,8 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.cuibluetooth.bleeconomy.model.Person
+import com.cuibluetooth.bleeconomy.model.PersonId
 import com.cuibluetooth.bleeconomy.model.Student
 import com.cuibluetooth.bleeconomy.ui.MapView
 import com.cuibluetooth.bleeconomy.ui.StudentAdapter
@@ -40,6 +42,8 @@ class MapActivity : AppCompatActivity() {
     private var isPanelExpanded = false
     private var areFiltersExpanded = false
     private var allStudents: List<Student> = emptyList()
+    private val trackedStudentsIds : MutableSet<PersonId> = mutableSetOf()
+    private var personsMap: Map<PersonId, Person> = emptyMap()
     private var isAdvertising = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,14 +65,19 @@ class MapActivity : AppCompatActivity() {
         filterCodeInput = findViewById(R.id.filter_code_edit_text)
         filterProjectInput = findViewById(R.id.filter_project_edit_text)
 
-        studentAdapter = StudentAdapter()
+        studentAdapter = StudentAdapter { student, isTracked ->
+            if (isTracked) {
+                trackedStudentsIds.add(student.id)
+            } else {
+                trackedStudentsIds.remove(student.id)
+            }
+            applyFilters()
+            refreshMapPersons()
+        }
         val studentRecycler = findViewById<RecyclerView>(R.id.student_recycler).apply {
             layoutManager = LinearLayoutManager(this@MapActivity)
             adapter = studentAdapter
         }
-
-        //When clicking outside of the panelCard hide it
-        //TODO
 
 
         panelToggle.setOnClickListener { togglePanel() }
@@ -82,10 +91,27 @@ class MapActivity : AppCompatActivity() {
         toggleAdvertiseButton.text = if (isAdvertising) "Stop Advertising" else "Start Advertising"
         toggleAdvertiseButton.setOnClickListener { toggleAdvertise() }
 
-        viewModel.persons.observe(this) { personsMap ->
-            mapView.setPersons(personsMap.values.toList())
-            allStudents = personsMap.values.filterIsInstance<Student>()
+        val mapContainer = findViewById<ConstraintLayout>(R.id.map_container)
+        val collapseIfExpanded: (View) -> Unit = {
+            if (isPanelExpanded) {
+                collapsePanel()
+            }
+        }
+        mapContainer.setOnClickListener(collapseIfExpanded)
+        mapView.setOnClickListener(collapseIfExpanded)
+
+        viewModel.persons.observe(this) { persons ->
+            val previousPersons = personsMap
+            personsMap = persons
+            allStudents = persons.values.filterIsInstance<Student>()
+            allStudents.forEach { student ->
+                val wasKnownStudent = previousPersons[student.id] is Student
+                if (!wasKnownStudent && student.id !in trackedStudentsIds) {
+                    trackedStudentsIds.add(student.id)
+                }
+            }
             applyFilters()
+            refreshMapPersons()
         }
 
         updatePanelUi()
@@ -100,7 +126,12 @@ class MapActivity : AppCompatActivity() {
         updatePanelUi()
         updateFiltersUi()
     }
-
+    private fun collapsePanel() {
+        isPanelExpanded = false
+        areFiltersExpanded = false
+        updatePanelUi()
+        updateFiltersUi()
+    }
     private fun toggleFilters() {
         if (!isPanelExpanded) return
         areFiltersExpanded = !areFiltersExpanded
@@ -147,7 +178,12 @@ class MapActivity : AppCompatActivity() {
                     matchesField(student.projectName, projectQuery)
         }.sortedBy { it.name ?: it.username }
 
-        studentAdapter.submitList(filtered)
+        val items = filtered.map { student ->
+            val isTracked = trackedStudentsIds.contains(student.id)
+            StudentAdapter.StudentListItem(student, isTracked)
+        }
+
+        studentAdapter.submitList(items)
     }
 
     private fun matchesSearch(student: Student, query: String): Boolean {
@@ -180,5 +216,15 @@ class MapActivity : AppCompatActivity() {
         } else {
             stopService(svcIntent)
         }
+    }
+
+    private fun refreshMapPersons() {
+        val personsToDisplay = personsMap.values.filter { person ->
+            when (person) {
+                is Student -> trackedStudentsIds.contains(person.id)
+                else -> true
+            }
+        }
+        mapView.setPersons(personsToDisplay)
     }
 }
