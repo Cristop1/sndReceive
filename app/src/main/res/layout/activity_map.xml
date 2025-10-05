@@ -34,20 +34,10 @@
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp">
 
-                <ImageButton
-                    android:id="@+id/btn_panel_fold"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Collapse panel"
-                    android:padding="4dp"
-                    app:srcCompat="@android:drawable/ic_media_previous" />
-
                 <TextView
                     android:id="@+id/panel_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
                     android:layout_marginEnd="12dp"
                     android:layout_weight="1"
                     android:text="Students"
@@ -113,21 +103,6 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/filter_name_layout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:hint="Filter by name">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/filter_name_edit_text"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPersonName" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/filter_project_layout"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
@@ -172,6 +147,35 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/panel_toggle_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageButton
+                android:id="@+id/btn_panel_fold"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/panel_toggle_content_description_expand"
+                android:padding="4dp"
+                app:srcCompat="@android:drawable/ic_media_next" />
+
+            <TextView
+                android:id="@+id/panel_toggle_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/panel_toggle_hint"
+                android:textAppearance="@style/TextAppearance.SndReceive.BodySmall" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnToggleAdvertise"

@@ -30,16 +30,20 @@ class StudentAdapter : ListAdapter<Student, StudentAdapter.StudentViewHolder>(Di
                 student.name?.takeIf { it.isNotBlank() } ?: student.username
             binding.studentProject.text =
                 student.projectName?.takeIf { it.isNotBlank() } ?: "—"
+            //TODO binding.studentCheckbox.isChecked = student.isTracked
+            binding.root.setOnClickListener {
+                // TODO Later add a popup to the respective Student
+            }
         }
-    }
 
-    companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<Student>() {
-            override fun areItemsTheSame(oldItem: Student, newItem: Student): Boolean =
-                oldItem.id == newItem.id
+        companion object {
+            private val DiffCallback = object : DiffUtil.ItemCallback<Student>() {
+                override fun areItemsTheSame(oldItem: Student, newItem: Student): Boolean =
+                    oldItem.id == newItem.id
 
-            override fun areContentsTheSame(oldItem: Student, newItem: Student): Boolean =
-                oldItem == newItem
+                override fun areContentsTheSame(oldItem: Student, newItem: Student): Boolean =
+                    oldItem == newItem
+            }
         }
     }
 }

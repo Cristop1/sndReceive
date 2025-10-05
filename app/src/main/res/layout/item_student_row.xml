@@ -33,5 +33,10 @@
         android:text="Project"
         android:textAlignment="viewEnd"
         android:textAppearance="@style/TextAppearance.SndReceive.BodyMedium" />
+    <CheckBox
+        android:id="@+id/student_checkbox"
+        android:layout_width="50dp"
+        android:layout_height="20dp"
+        />
 
 </LinearLayout>

@@ -31,13 +31,13 @@ class MapActivity : AppCompatActivity() {
     private lateinit var filtersToggle: ImageButton
     private lateinit var panelContent: View
     private lateinit var filtersContainer: View
+    private lateinit var panelToggleHint: TextView
     private lateinit var searchInput: TextInputEditText
     private lateinit var filterCodeInput: TextInputEditText
-    private lateinit var filterNameInput: TextInputEditText
     private lateinit var filterProjectInput: TextInputEditText
     private lateinit var studentAdapter: StudentAdapter
 
-    private var isPanelExpanded = true
+    private var isPanelExpanded = false
     private var areFiltersExpanded = false
     private var allStudents: List<Student> = emptyList()
     private var isAdvertising = true
@@ -55,10 +55,10 @@ class MapActivity : AppCompatActivity() {
         filtersToggle = findViewById(R.id.btn_filters_toggle)
         panelContent = findViewById(R.id.panel_content_container)
         filtersContainer = findViewById(R.id.filter_fields_container)
+        panelToggleHint = findViewById(R.id.panel_toggle_hint)
 
         searchInput = findViewById(R.id.search_edit_text)
         filterCodeInput = findViewById(R.id.filter_code_edit_text)
-        filterNameInput = findViewById(R.id.filter_name_edit_text)
         filterProjectInput = findViewById(R.id.filter_project_edit_text)
 
         studentAdapter = StudentAdapter()
@@ -70,7 +70,7 @@ class MapActivity : AppCompatActivity() {
         panelToggle.setOnClickListener { togglePanel() }
         filtersToggle.setOnClickListener { toggleFilters() }
 
-        listOf(searchInput, filterCodeInput, filterNameInput, filterProjectInput).forEach { editText ->
+        listOf(searchInput, filterCodeInput, filterProjectInput).forEach { editText ->
             editText.doAfterTextChanged { applyFilters() }
         }
 
@@ -105,20 +105,25 @@ class MapActivity : AppCompatActivity() {
 
     private fun updatePanelUi() {
         val params = panelCard.layoutParams as ConstraintLayout.LayoutParams
-        if (isPanelExpanded) {
-            params.width = 0
-            params.matchConstraintPercentWidth = 0.75f
-        } else {
-            params.width = ConstraintLayout.LayoutParams.WRAP_CONTENT
-            params.matchConstraintPercentWidth = 0f
-        }
+        params.width = 0
+        params.matchConstraintPercentWidth = if (isPanelExpanded) 0.75f else 0f
         panelCard.layoutParams = params
+        panelCard.isVisible = isPanelExpanded
 
         panelContent.isVisible = isPanelExpanded
         panelTitle.isVisible = isPanelExpanded
         filtersToggle.isVisible = isPanelExpanded
+        panelToggleHint.isVisible = !isPanelExpanded
         panelToggle.setImageResource(
             if (isPanelExpanded) android.R.drawable.ic_media_previous else android.R.drawable.ic_media_next
+        )
+
+        panelToggle.contentDescription = getString(
+            if (isPanelExpanded) {
+                R.string.panel_toggle_content_description_collapse
+            } else {
+                R.string.panel_toggle_content_description_expand
+            }
         )
     }
 
@@ -130,13 +135,11 @@ class MapActivity : AppCompatActivity() {
     private fun applyFilters() {
         val searchQuery = searchInput.text?.toString().orEmpty().trim()
         val codeQuery = filterCodeInput.text?.toString().orEmpty().trim()
-        val nameQuery = filterNameInput.text?.toString().orEmpty().trim()
         val projectQuery = filterProjectInput.text?.toString().orEmpty().trim()
 
         val filtered = allStudents.filter { student ->
             matchesSearch(student, searchQuery) &&
                     matchesField(student.institutionalCode, codeQuery) &&
-                    matchesField(student.name, nameQuery) &&
                     matchesField(student.projectName, projectQuery)
         }.sortedBy { it.name ?: it.username }
 
