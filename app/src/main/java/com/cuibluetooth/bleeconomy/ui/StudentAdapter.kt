@@ -1,4 +1,5 @@
 package com.cuibluetooth.bleeconomy.ui
+
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -35,15 +36,15 @@ class StudentAdapter : ListAdapter<Student, StudentAdapter.StudentViewHolder>(Di
                 // TODO Later add a popup to the respective Student a
             }
         }
+    }
 
-        companion object {
-            private val DiffCallback = object : DiffUtil.ItemCallback<Student>() {
-                override fun areItemsTheSame(oldItem: Student, newItem: Student): Boolean =
-                    oldItem.id == newItem.id
+    companion object {
+        private val DiffCallback = object : DiffUtil.ItemCallback<Student>() {
+            override fun areItemsTheSame(oldItem: Student, newItem: Student): Boolean =
+                oldItem.id == newItem.id
 
-                override fun areContentsTheSame(oldItem: Student, newItem: Student): Boolean =
-                    oldItem == newItem
-            }
+            override fun areContentsTheSame(oldItem: Student, newItem: Student): Boolean =
+                oldItem == newItem
         }
     }
 }
