@@ -35,6 +35,7 @@ class MapActivity : AppCompatActivity() {
     private lateinit var filtersContainer: View
     private lateinit var panelToggleHint: TextView
     private lateinit var searchInput: TextInputEditText
+    private lateinit var filterNameInput: TextInputEditText
     private lateinit var filterCodeInput: TextInputEditText
     private lateinit var filterProjectInput: TextInputEditText
     private lateinit var studentAdapter: StudentAdapter
@@ -62,6 +63,7 @@ class MapActivity : AppCompatActivity() {
         panelToggleHint = findViewById(R.id.panel_toggle_hint)
 
         searchInput = findViewById(R.id.search_edit_text)
+        filterNameInput = findViewById(R.id.filter_name_edit_text)
         filterCodeInput = findViewById(R.id.filter_code_edit_text)
         filterProjectInput = findViewById(R.id.filter_project_edit_text)
 
@@ -83,7 +85,7 @@ class MapActivity : AppCompatActivity() {
         panelToggle.setOnClickListener { togglePanel() }
         filtersToggle.setOnClickListener { toggleFilters() }
 
-        listOf(searchInput, filterCodeInput, filterProjectInput).forEach { editText ->
+        listOf(searchInput,filterNameInput, filterCodeInput, filterProjectInput).forEach { editText ->
             editText.doAfterTextChanged { applyFilters() }
         }
 
@@ -169,11 +171,13 @@ class MapActivity : AppCompatActivity() {
 
     private fun applyFilters() {
         val searchQuery = searchInput.text?.toString().orEmpty().trim()
+        val nameQuery = filterNameInput.text?.toString().orEmpty().trim()
         val codeQuery = filterCodeInput.text?.toString().orEmpty().trim()
         val projectQuery = filterProjectInput.text?.toString().orEmpty().trim()
 
         val filtered = allStudents.filter { student ->
             matchesSearch(student, searchQuery) &&
+                    matchesField(student.name,nameQuery) &&
                     matchesField(student.institutionalCode, codeQuery) &&
                     matchesField(student.projectName, projectQuery)
         }.sortedBy { it.name ?: it.username }
