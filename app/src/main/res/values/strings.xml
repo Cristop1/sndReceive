@@ -5,4 +5,7 @@
     <string name="panel_toggle_content_description_collapse"></string>
     <string name="select_all">Seleccionar todos</string>
     <string name="deselect_all">Deseleccionar todos</string>
+    <string name="permit_code_hint">Código de permiso</string>
+    <string name="uuid_hint">UUID de dispositivo</string>
+    <string name="submit">Enviar</string>
 </resources>
