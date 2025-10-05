@@ -67,6 +67,10 @@ class MapActivity : AppCompatActivity() {
             adapter = studentAdapter
         }
 
+        //When clicking outside of the panelCard hide it
+        //TODO
+
+
         panelToggle.setOnClickListener { togglePanel() }
         filtersToggle.setOnClickListener { toggleFilters() }
 

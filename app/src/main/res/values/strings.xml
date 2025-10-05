@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">sndReceive</string>
-    <string name="panel_toggle_hint">Tap para ver lista de estudiantes</string>
-    <string name="panel_toggle_content_description_expand">Mostrar lista de estudiantes</string>
-    <string name="panel_toggle_content_description_collapse">Ocultar lista de estudiantes</string>
+    <string name="panel_toggle_hint">Estudiantes</string>
+    <string name="panel_toggle_content_description_expand">Estudiantes</string>
+    <string name="panel_toggle_content_description_collapse"></string>
 </resources>
