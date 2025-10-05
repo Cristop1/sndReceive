@@ -1,0 +1,5 @@
+<resources>
+    <!-- Text appearance wrappers mapping to Material Components styles that exist in the library version -->
+    <style name="TextAppearance.SndReceive.TitleMedium" parent="@style/TextAppearance.MaterialComponents.Headline6" />
+    <style name="TextAppearance.SndReceive.BodyMedium" parent="@style/TextAppearance.MaterialComponents.Body1" />
+</resources>
