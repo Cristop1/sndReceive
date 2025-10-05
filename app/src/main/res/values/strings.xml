@@ -3,4 +3,6 @@
     <string name="panel_toggle_hint">Estudiantes</string>
     <string name="panel_toggle_content_description_expand">Estudiantes</string>
     <string name="panel_toggle_content_description_collapse"></string>
+    <string name="select_all">Seleccionar todos</string>
+    <string name="deselect_all">Deseleccionar todos</string>
 </resources>

@@ -3,7 +3,6 @@ package com.cuibluetooth.bleeconomy
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import com.cuibluetooth.bleeconomy.R
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -21,6 +20,7 @@ import com.cuibluetooth.bleeconomy.model.Student
 import com.cuibluetooth.bleeconomy.ui.MapView
 import com.cuibluetooth.bleeconomy.ui.StudentAdapter
 import com.cuibluetooth.bleeconomy.viewmodel.MapViewModel
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 
@@ -28,6 +28,7 @@ class MapActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var viewModel: MapViewModel
     private lateinit var panelCard: MaterialCardView
+    private lateinit var selectAllButton : MaterialButton
     private lateinit var panelToggle: ImageButton
     private lateinit var panelTitle: TextView
     private lateinit var filtersToggle: ImageButton
@@ -46,6 +47,7 @@ class MapActivity : AppCompatActivity() {
     private val trackedStudentsIds : MutableSet<PersonId> = mutableSetOf()
     private var personsMap: Map<PersonId, Person> = emptyMap()
     private var isAdvertising = true
+    private var toggleAdvertiseButton : Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +55,11 @@ class MapActivity : AppCompatActivity() {
 
         mapView = findViewById(R.id.map_view)
         viewModel = ViewModelProvider(this)[MapViewModel::class.java]
-
+        toggleAdvertiseButton = findViewById(R.id.btnToggleAdvertise)
         panelCard = findViewById(R.id.panel_container)
         panelToggle = findViewById(R.id.btn_panel_fold)
         panelTitle = findViewById(R.id.panel_title)
+        selectAllButton = findViewById(R.id.btn_toggle_select_all)
         filtersToggle = findViewById(R.id.btn_filters_toggle)
         panelContent = findViewById(R.id.panel_content_container)
         filtersContainer = findViewById(R.id.filter_fields_container)
@@ -73,6 +76,7 @@ class MapActivity : AppCompatActivity() {
             } else {
                 trackedStudentsIds.remove(student.id)
             }
+            updateSelectAllButton()
             applyFilters()
             refreshMapPersons()
         }
@@ -82,21 +86,24 @@ class MapActivity : AppCompatActivity() {
         }
 
 
-        panelToggle.setOnClickListener { togglePanel() }
+        panelToggle.setOnClickListener { togglePanel(toggleAdvertiseButton) }
         filtersToggle.setOnClickListener { toggleFilters() }
+        selectAllButton.setOnClickListener { toggleSelectAllStudents() }
 
         listOf(searchInput,filterNameInput, filterCodeInput, filterProjectInput).forEach { editText ->
             editText.doAfterTextChanged { applyFilters() }
         }
 
-        val toggleAdvertiseButton = findViewById<Button>(R.id.btnToggleAdvertise)
-        toggleAdvertiseButton.text = if (isAdvertising) "Stop Advertising" else "Start Advertising"
-        toggleAdvertiseButton.setOnClickListener { toggleAdvertise() }
+        toggleAdvertiseButton = findViewById<Button>(R.id.btnToggleAdvertise)
+        toggleAdvertiseButton?.bringToFront()
+        toggleAdvertiseButton?.translationZ = 16f
+        toggleAdvertiseButton?.text = if (isAdvertising) "Stop Advertising" else "Start Advertising"
+        toggleAdvertiseButton?.setOnClickListener { toggleAdvertise() }
 
         val mapContainer = findViewById<ConstraintLayout>(R.id.map_container)
         val collapseIfExpanded: (View) -> Unit = {
             if (isPanelExpanded) {
-                collapsePanel()
+                collapsePanel(toggleAdvertiseButton)
             }
         }
         mapContainer.setOnClickListener(collapseIfExpanded)
@@ -114,24 +121,26 @@ class MapActivity : AppCompatActivity() {
             }
             applyFilters()
             refreshMapPersons()
+            updateSelectAllButton()
         }
 
-        updatePanelUi()
+        updatePanelUi(toggleAdvertiseButton)
         updateFiltersUi()
+        updateSelectAllButton()
     }
 
-    private fun togglePanel() {
+    private fun togglePanel(toggleAdvertiseButton: Button?) {
         isPanelExpanded = !isPanelExpanded
         if (!isPanelExpanded) {
             areFiltersExpanded = false
         }
-        updatePanelUi()
+        updatePanelUi(toggleAdvertiseButton)
         updateFiltersUi()
     }
-    private fun collapsePanel() {
+    private fun collapsePanel(toggleAdvertiseButton: Button?) {
         isPanelExpanded = false
         areFiltersExpanded = false
-        updatePanelUi()
+        updatePanelUi(toggleAdvertiseButton)
         updateFiltersUi()
     }
     private fun toggleFilters() {
@@ -140,7 +149,7 @@ class MapActivity : AppCompatActivity() {
         updateFiltersUi()
     }
 
-    private fun updatePanelUi() {
+    private fun updatePanelUi(toggleAdvertiseButton: Button?) {
         val params = panelCard.layoutParams as ConstraintLayout.LayoutParams
         params.width = 0
         params.matchConstraintPercentWidth = if (isPanelExpanded) 0.75f else 0f
@@ -151,6 +160,10 @@ class MapActivity : AppCompatActivity() {
         panelTitle.isVisible = isPanelExpanded
         filtersToggle.isVisible = isPanelExpanded
         panelToggleHint.isVisible = !isPanelExpanded
+
+        toggleAdvertiseButton?.isVisible = !isPanelExpanded
+        toggleAdvertiseButton?.isEnabled = !isPanelExpanded
+
         panelToggle.setImageResource(
             if (isPanelExpanded) android.R.drawable.ic_media_previous else android.R.drawable.ic_media_next
         )
@@ -188,26 +201,68 @@ class MapActivity : AppCompatActivity() {
         }
 
         studentAdapter.submitList(items)
+        updateSelectAllButton()
     }
 
-    private fun matchesSearch(student: Student, query: String): Boolean {
+    private fun toggleSelectAllStudents(){
+        val shouldSelectAll = !allStudents.all { trackedStudentsIds.contains(it.id) }
+        if(shouldSelectAll) {
+            trackedStudentsIds.addAll(allStudents.map { it.id })
+        } else{
+            trackedStudentsIds.removeAll(allStudents.map { it.id } )
+        }
+        applyFilters()
+        refreshMapPersons()
+        updateSelectAllButton()
+    }
+
+    private fun updateSelectAllButton(){
+        val allTracked = allStudents.all { trackedStudentsIds.contains(it.id) }
+        val textRes = if (allTracked) R.string.deselect_all else R.string.select_all
+        if (::selectAllButton.isInitialized) {
+            selectAllButton.setText(textRes)
+        }
+    }
+    private fun containsSubsequence(text: String?, query: String): Boolean {
+        if (text == null) return false
         if (query.isEmpty()) return true
-        return listOfNotNull(
-            student.institutionalCode,
-            student.name,
-            student.projectName,
-            student.username
-        ).any { it.contains(query, ignoreCase = true) }
+        val pattern = query.map { Regex.escape(it.toString()) }.joinToString(".*")
+        return Regex(pattern, RegexOption.IGNORE_CASE).containsMatchIn(text)
+    }
+    private fun matchOneField(value: String?, token: String): Boolean {
+        // 1) normal substring first (fast path)  2) subsequence fallback
+        if (value == null) return false
+        if (token.isEmpty()) return true
+        return value.contains(token, ignoreCase = true) || containsSubsequence(value, token)
+    }
+
+    private fun splitTokens(q: String): List<String> =
+        q.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+
+    private fun matchesSearch(student: Student, query: String): Boolean {
+        val tokens = splitTokens(query)
+        if (tokens.isEmpty()) return true
+        // AND semantics across tokens; token can match any field
+        return tokens.all { token ->
+            listOfNotNull(
+                student.institutionalCode,
+                student.name,
+                student.projectName
+            ).any { field -> matchOneField(field, token) }
+        }
     }
 
     private fun matchesField(value: String?, query: String): Boolean {
-        if (query.isEmpty()) return true
-        return value?.contains(query, ignoreCase = true) == true
+        val tokens = splitTokens(query)
+        if (tokens.isEmpty()) return true
+        return tokens.all { token -> matchOneField(value, token) }
     }
+
 
     private fun toggleAdvertise() {
         isAdvertising = !isAdvertising
         val toggleAdvertiseButton = findViewById<Button>(R.id.btnToggleAdvertise)
+
         toggleAdvertiseButton.text = if (isAdvertising) "Stop Advertising" else "Start Advertising"
 
         val action = if (isAdvertising) BleAdvertiserService.ACTION_START else BleAdvertiserService.ACTION_STOP

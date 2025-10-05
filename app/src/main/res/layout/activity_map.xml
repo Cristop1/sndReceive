@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <Button
         android:id="@+id/btnToggleAdvertise"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="12dp"
+        android:translationZ="12dp"
         android:layout_margin="16dp"
         android:layout_marginTop="10dp"
         android:layout_marginStart="10dp"
@@ -42,13 +45,12 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="8dp"
                 android:paddingTop="12dp"
-                android:paddingBottom="12dp">
+                android:paddingBottom="8dp">
 
                 <TextView
                     android:id="@+id/panel_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
                     android:layout_weight="1"
                     android:text="Students"
                     android:textAppearance="@style/TextAppearance.SndReceive.BodyMedium" />
@@ -62,6 +64,20 @@
                     android:padding="4dp"
                     app:srcCompat="@android:drawable/arrow_down_float" />
             </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_toggle_select_all"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/select_all"
+                android:textSize="8sp"
+                app:cornerRadius="16dp"
+                android:layout_marginStart="10dp"
+                android:paddingBottom="8dp"
+                android:paddingStart="20dp"
+                tools:ignore="RtlSymmetry" />
 
             <LinearLayout
                 android:id="@+id/panel_content_container"
@@ -187,6 +203,7 @@
                 android:id="@+id/btn_panel_fold"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_marginTop="20dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/panel_toggle_content_description_expand"
                 android:padding="4dp"
