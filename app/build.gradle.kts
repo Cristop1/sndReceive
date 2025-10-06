@@ -19,9 +19,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "AWS_VERIFICATION_URL", "\"\"")
-        buildConfigField("String", "MQTT_SCHEME", "\"tcp\"")
+        /*buildConfigField("String", "MQTT_SCHEME", "\"tcp\"")
         buildConfigField("String", "MQTT_HOST", "\"10.0.2.2\"")
-        buildConfigField("int", "MQTT_PORT", "1883")
+        buildConfigField("int", "MQTT_PORT", "1883")*/
+        buildConfigField("String", "MQTT_SCHEME", "\"ssl\"")
+        buildConfigField(
+            "String",
+            "MQTT_HOST",
+            "\"1d319c2c71c04728b5afe6ed52eadc3b.s1.eu.hivemq.cloud\""
+        )
+        buildConfigField("int", "MQTT_PORT", "8883")
         buildConfigField("String", "MQTT_CLIENT_ID_PREFIX", "\"BleEconomy\"")
 
     /* TODO : Add AWS IoT configuration

@@ -24,6 +24,7 @@ interface Person {
     val projectName: String?
     var actual: Coordinates
     val role: Role
+
 }
 
 /** Device owner (the phone running the app). */
