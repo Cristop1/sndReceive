@@ -69,7 +69,7 @@ class MqttClientManagerTest {
                 callback?.connectComplete(false, "tcp://localhost:1883")
             } else {
                 connected = false
-                listener.onFailure(null, MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR))
+                listener.onFailure(null, MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR.toInt()))
             }
         }
 
@@ -78,7 +78,7 @@ class MqttClientManagerTest {
         }
 
         override fun publish(topic: String, payload: ByteArray, qos: Int, retained: Boolean) {
-            if (!connected) throw MqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED)
+            if (!connected) throw MqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED.toInt())
         }
 
         override fun setCallback(callback: MqttCallbackExtended) {
