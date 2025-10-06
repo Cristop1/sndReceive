@@ -11,9 +11,14 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.cuibluetooth.bleeconomy.repository.SessionStore
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var sessionStore: SessionStore
+    private var activeSession: SessionStore.Session? = null
     private val requiredPerms: Array<String> by lazy {
         val base = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             arrayOf(
@@ -32,27 +37,67 @@ class MainActivity : AppCompatActivity() {
     private val requestPerms =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             // If all granted, proceed; else just finish (or show a message if you prefer)
-            if (hasAllPerms()) proceed()
+            if (hasAllPerms()) ensureSessionOrLogin()
             else finish()
         }
 
     private val requestEnableBT =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            proceed()
+            proceed(activeSession)
+        }
+
+    private val requestLogin =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result->
+            if (result.resultCode == RESULT_OK) {
+                lifecycleScope.launch{
+                    val session = sessionStore.getSession()
+                    if(session == null || sessionStore.isSessionExpired(session)){
+                        finish()
+                    } else{
+                        activeSession = session
+                        proceed(session)
+                    }
+                }
+            } else {
+                finish()
+            }
+
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        sessionStore = SessionStore.getInstance(applicationContext)
         // No UI needed; we’re a trampoline to the map & service.
         if (!hasAllPerms()) {
             requestPerms.launch(requiredPerms)
         } else {
-            proceed()
+            ensureSessionOrLogin()
         }
     }
 
-    private fun proceed() {
+    private fun ensureSessionOrLogin() {
+        lifecycleScope.launch {
+            val session = sessionStore.getSession()
+            if (sessionStore.isSessionExpired(session)) {
+                sessionStore.clearSession()
+                activeSession = null
+                requestLogin.launch(Intent(this@MainActivity, LoginActivity::class.java))
+            } else if (session == null) {
+                activeSession = null
+                requestLogin.launch(Intent(this@MainActivity, LoginActivity::class.java))
+            } else {
+                activeSession = session
+                proceed(session)
+            }
+        }
+    }
+
+    private fun proceed(session : SessionStore.Session? = activeSession) {
+        val currentSession = session ?: run {
+            ensureSessionOrLogin()
+            return
+        }
         // Ensure Bluetooth is enabled
         val btMgr = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val adapter = btMgr.adapter
@@ -72,8 +117,8 @@ class MainActivity : AppCompatActivity() {
             // Optional defaults—you can remove or customize these:
             putExtra(BleAdvertiserService.EXTRA_FREQ_HZ, 1.0)
             putExtra(BleAdvertiserService.EXTRA_DUTY_PCT, 50)
-            putExtra(BleAdvertiserService.EXTRA_UUID_STR, "0000c111-0000-1000-8000-00805f9b34fb")
-            putExtra(BleAdvertiserService.EXTRA_PAYLOAD, "ping")
+            putExtra(BleAdvertiserService.EXTRA_UUID_STR, currentSession.assignedUuid)
+            putExtra(BleAdvertiserService.EXTRA_PAYLOAD, currentSession.permitCode)
         }
         ContextCompat.startForegroundService(this, svcIntent)
 

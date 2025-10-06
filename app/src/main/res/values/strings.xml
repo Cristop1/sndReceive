@@ -8,4 +8,12 @@
     <string name="permit_code_hint">Código de permiso</string>
     <string name="uuid_hint">UUID de dispositivo</string>
     <string name="submit">Enviar</string>
+    <string name="login_title">Iniciar sesión</string>
+    <string name="login_username_hint">Usuario o correo</string>
+    <string name="login_password_hint">Contraseña</string>
+    <string name="login_permit_hint">Código de permiso</string>
+    <string name="login_submit">Acceder</string>
+    <string name="login_missing_fields">Completa todos los campos.</string>
+    <string name="login_generic_error">No se pudo verificar la sesión. Inténtalo de nuevo.</string>
+    <string name="sign_out">Cerrar sesión</string>
 </resources>

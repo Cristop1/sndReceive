@@ -12,17 +12,20 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cuibluetooth.bleeconomy.model.Person
 import com.cuibluetooth.bleeconomy.model.PersonId
 import com.cuibluetooth.bleeconomy.model.Student
+import com.cuibluetooth.bleeconomy.repository.SessionStore
 import com.cuibluetooth.bleeconomy.ui.MapView
 import com.cuibluetooth.bleeconomy.ui.StudentAdapter
 import com.cuibluetooth.bleeconomy.viewmodel.MapViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.launch
 
 class MapActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
@@ -40,6 +43,7 @@ class MapActivity : AppCompatActivity() {
     private lateinit var filterCodeInput: TextInputEditText
     private lateinit var filterProjectInput: TextInputEditText
     private lateinit var studentAdapter: StudentAdapter
+    private lateinit var signOutButton: MaterialButton
 
     private var isPanelExpanded = false
     private var areFiltersExpanded = false
@@ -48,6 +52,7 @@ class MapActivity : AppCompatActivity() {
     private var personsMap: Map<PersonId, Person> = emptyMap()
     private var isAdvertising = true
     private var toggleAdvertiseButton : Button? = null
+    private var panelToggleContainer : View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +69,7 @@ class MapActivity : AppCompatActivity() {
         panelContent = findViewById(R.id.panel_content_container)
         filtersContainer = findViewById(R.id.filter_fields_container)
         panelToggleHint = findViewById(R.id.panel_toggle_hint)
-
+        panelToggleContainer = findViewById(R.id.panel_toggle_container)
         searchInput = findViewById(R.id.search_edit_text)
         filterNameInput = findViewById(R.id.filter_name_edit_text)
         filterCodeInput = findViewById(R.id.filter_code_edit_text)
@@ -86,7 +91,7 @@ class MapActivity : AppCompatActivity() {
         }
 
 
-        panelToggle.setOnClickListener { togglePanel(toggleAdvertiseButton) }
+        panelToggle.setOnClickListener { togglePanel(toggleAdvertiseButton, signOutButton, panelToggleContainer) }
         filtersToggle.setOnClickListener { toggleFilters() }
         selectAllButton.setOnClickListener { toggleSelectAllStudents() }
 
@@ -100,10 +105,23 @@ class MapActivity : AppCompatActivity() {
         toggleAdvertiseButton?.text = if (isAdvertising) "Stop Advertising" else "Start Advertising"
         toggleAdvertiseButton?.setOnClickListener { toggleAdvertise() }
 
+        signOutButton = findViewById(R.id.btn_sign_out)
+        signOutButton.translationZ = 16f
+        signOutButton.setOnClickListener {
+            lifecycleScope.launch {
+                SessionStore.getInstance(applicationContext).clearSession()
+                val intent = Intent(this@MapActivity, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+                finish()
+            }
+        }
+
         val mapContainer = findViewById<ConstraintLayout>(R.id.map_container)
         val collapseIfExpanded: (View) -> Unit = {
             if (isPanelExpanded) {
-                collapsePanel(toggleAdvertiseButton)
+                collapsePanel(toggleAdvertiseButton, signOutButton)
             }
         }
         mapContainer.setOnClickListener(collapseIfExpanded)
@@ -124,23 +142,23 @@ class MapActivity : AppCompatActivity() {
             updateSelectAllButton()
         }
 
-        updatePanelUi(toggleAdvertiseButton)
+        updatePanelUi(toggleAdvertiseButton, signOutButton, panelToggleContainer)
         updateFiltersUi()
         updateSelectAllButton()
     }
 
-    private fun togglePanel(toggleAdvertiseButton: Button?) {
+    private fun togglePanel(toggleAdvertiseButton: Button?, signOutButton : MaterialButton?,panelToggleContainer : View?) {
         isPanelExpanded = !isPanelExpanded
         if (!isPanelExpanded) {
             areFiltersExpanded = false
         }
-        updatePanelUi(toggleAdvertiseButton)
+        updatePanelUi(toggleAdvertiseButton, signOutButton, panelToggleContainer)
         updateFiltersUi()
     }
-    private fun collapsePanel(toggleAdvertiseButton: Button?) {
+    private fun collapsePanel(toggleAdvertiseButton: Button?, signOutButton: MaterialButton?) {
         isPanelExpanded = false
         areFiltersExpanded = false
-        updatePanelUi(toggleAdvertiseButton)
+        updatePanelUi(toggleAdvertiseButton, signOutButton, panelToggleContainer)
         updateFiltersUi()
     }
     private fun toggleFilters() {
@@ -149,7 +167,7 @@ class MapActivity : AppCompatActivity() {
         updateFiltersUi()
     }
 
-    private fun updatePanelUi(toggleAdvertiseButton: Button?) {
+    private fun updatePanelUi(toggleAdvertiseButton: Button?, signOutButton : MaterialButton?, panelToggleContainer : View?) {
         val params = panelCard.layoutParams as ConstraintLayout.LayoutParams
         params.width = 0
         params.matchConstraintPercentWidth = if (isPanelExpanded) 0.75f else 0f
@@ -163,6 +181,12 @@ class MapActivity : AppCompatActivity() {
 
         toggleAdvertiseButton?.isVisible = !isPanelExpanded
         toggleAdvertiseButton?.isEnabled = !isPanelExpanded
+
+        signOutButton?.isVisible = isPanelExpanded
+        signOutButton?.isEnabled = isPanelExpanded
+
+        panelToggleContainer?.isVisible = !isPanelExpanded
+        panelToggleContainer?.isEnabled = !isPanelExpanded
 
         panelToggle.setImageResource(
             if (isPanelExpanded) android.R.drawable.ic_media_previous else android.R.drawable.ic_media_next
