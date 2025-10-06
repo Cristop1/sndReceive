@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.cuibluetooth.bleeconomy.mqtt.StreamingSettingsActivity
 import com.cuibluetooth.bleeconomy.model.Person
 import com.cuibluetooth.bleeconomy.model.PersonId
 import com.cuibluetooth.bleeconomy.model.Student
@@ -289,9 +290,15 @@ class MapActivity : AppCompatActivity() {
 
         toggleAdvertiseButton.text = if (isAdvertising) "Stop Advertising" else "Start Advertising"
 
-        val action = if (isAdvertising) BleAdvertiserService.ACTION_START else BleAdvertiserService.ACTION_STOP
+        val action = if (isAdvertising){
+            BleAdvertiserService.ACTION_START
+            startActivity(Intent(this, StreamingSettingsActivity::class.java))
+        }  else {
+            BleAdvertiserService.ACTION_STOP
+            stopService(Intent(this@MapActivity, com.cuibluetooth.bleeconomy.service.ImuPublisherService::class.java))
+        }
         val svcIntent = Intent(this, BleAdvertiserService::class.java).apply {
-            this.action = action
+            this.action = action.toString()
         }
 
         if (isAdvertising) {

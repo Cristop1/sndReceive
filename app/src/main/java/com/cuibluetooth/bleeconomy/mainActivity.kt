@@ -13,7 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.cuibluetooth.bleeconomy.repository.SessionStore
+
 import kotlinx.coroutines.launch
+
+// Services
+import com.cuibluetooth.bleeconomy.service.ImuPublisherService
 
 class MainActivity : AppCompatActivity() {
 
@@ -114,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         // Start foreground advertiser service
         val svcIntent = Intent(this, BleAdvertiserService::class.java).apply {
             action = BleAdvertiserService.ACTION_START
-            // Optional defaults—you can remove or customize these:
+            // Optional defaults, can be omitted
             putExtra(BleAdvertiserService.EXTRA_FREQ_HZ, 1.0)
             putExtra(BleAdvertiserService.EXTRA_DUTY_PCT, 50)
             putExtra(BleAdvertiserService.EXTRA_UUID_STR, currentSession.assignedUuid)
@@ -122,6 +126,8 @@ class MainActivity : AppCompatActivity() {
         }
         ContextCompat.startForegroundService(this, svcIntent)
 
+        startService(Intent(this, ImuPublisherService::class.java))
+        
         // Hop to MapActivity
         startActivity(Intent(this, MapActivity::class.java))
         finish()
